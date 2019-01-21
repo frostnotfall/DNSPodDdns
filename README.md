@@ -1,6 +1,7 @@
 # DNSPodDdns
 
 对荒野无灯基于[anrip](https://github.com/anrip/ArDNSPod)的脚本添加 ipv6 支持
+* 2019.01.21 - 由于梅林获取ipv6有延迟，修改了下脚本，只在ddns ipv4 更新后通知梅林成功，更新ipv6后不会通知。当然实际上已经可用了
 
 荒野无灯原帖：http://koolshare.cn/thread-37553-1-1.html
 
