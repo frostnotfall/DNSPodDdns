@@ -11,7 +11,7 @@
 #################################################
 
 # 使用Token认证(推荐) 请去 https://www.dnspod.cn/console/user/security 获取
-arToken="在此输入你的token"
+arToken="23745,b55b4692822de38a8d0955bc66bbfc5a"
 # 使用邮箱和密码认证
 arMail=""
 arPass=""
@@ -27,7 +27,7 @@ arIpAdress_v6() {
     local hostIP_v6=$(ip addr show ppp0 | grep inet6 | sed 's/\/.*//g' | awk '{print $2}'  | grep 2408)
     while [[ -z $hostIP_v6 ]]
     do
-        sleep 300
+        sleep 60
         hostIP_v6=$(ip addr show ppp0 | grep inet6 | sed 's/\/.*//g' | awk '{print $2}'  | grep 2408)
     done
     echo $hostIP_v6
@@ -86,11 +86,11 @@ arDdnsUpdate() {
 
 # 更新ipv6记录信息
 arDdnsUpdate_v6() {
-    local lastIP_v6=${1}
+    local hostIP_v6=${1}
     local recordID recordRS recordCD
     recordID=$(echo $returnDatav6|sed 's/.\+\[{"id":"\([0-9]\+\)".\+/\1/')
     # 更新记录IP
-    recordRS=$(arApiPost "Record.Modify" "domain_id=${domainID}&record_id=${recordID}&sub_domain=${subdomain}&value=${lastIP_v6}&record_type=AAAA&record_line=默认")
+    recordRS=$(arApiPost "Record.Modify" "domain_id=${domainID}&record_id=${recordID}&sub_domain=${subdomain}&value=${hostIP_v6}&record_type=AAAA&record_line=默认")
     recordCD=$(echo -E $recordRS | sed 's/.\+{"code":"\([0-9]\+\)".\+/\1/')
     # 输出记录IP
     if [ "$recordCD" == "1" ]; then
@@ -122,10 +122,12 @@ arDdnsCheck() {
     if [ "$lastIP" != "$hostIP" ]; then
         arDdnsUpdate
         if [ $? -ne 0 ]; then
-            return 1
+            /sbin/ddns_custom_updated 1
         else
-            flag=0
+            /sbin/ddns_custom_updated 0
         fi
+    else
+        /sbin/ddns_custom_updated 1
     fi
 
     # ipv6
@@ -136,21 +138,11 @@ arDdnsCheck() {
 
     if [ "$lastIP_v6" != "$hostIP_v6" ]; then
         arDdnsUpdate_v6 ${hostIP_v6}
-        if [[ $? -eq 0 && $flag -eq 0 ]]; then
-            return 0
-        else
-            return 1
-        fi
     fi
 }
 
 ###################################################
 # 检查更新域名
 # 指定 domain subdomain
-arDdnsCheck "domain" "subdomain"
+arDdnsCheck "frostfall.cn" ""
 
-if [ $? -eq 0 ]; then
-    /sbin/ddns_custom_updated 1
-else
-    /sbin/ddns_custom_updated 0
-fi
