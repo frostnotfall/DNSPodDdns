@@ -8,11 +8,12 @@
 # 时间: 2016-02-24 16:25:00
 # Mod: 荒野无灯 http://ihacklog.com  2016-03-16
 # ReMod: 寒霜 https://www.frost.net.cn 2018-12-06
+# Refine: YMNNs https://github.com/YMNNs 2020-12-7
 #################################################
 
-# 使用前请修改第15行和第149行
+# 注意，请将第29行和第33行末尾的"240"改为公网ipv6的前3-4个字符
 # 使用Token认证(推荐) 请去 https://www.dnspod.cn/console/user/security 获取
-arToken="xxxxx,xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+arToken="xxx,xxxxxxxxxxxxxxxxxxxxxxxxx"
 # 使用邮箱和密码认证
 arMail=""
 arPass=""
@@ -45,7 +46,6 @@ arApiPost() {
         local param="login_token=${arToken}&format=json&${2}"
     fi
     # wget --no-check-certificate --output-document=- --user-agent=$agent --post-data $param $inter
-	# 此处使用curl以避免ssl错误
 	curl -s --user-agent "$agent" -d $param $inter
 }
 
@@ -122,17 +122,6 @@ arDdnsCheck() {
     lastIP=$(arNslookup)
     echo "lastIP: ${lastIP}"
 
-    if [ "$lastIP" != "$hostIP" ]; then
-        arDdnsUpdate
-        if [ $? -ne 0 ]; then
-            /sbin/ddns_custom_updated 1
-        else
-            /sbin/ddns_custom_updated 0
-        fi
-    else
-        /sbin/ddns_custom_updated 1
-    fi
-
     # ipv6
     hostIP_v6=$(arIpAdress_v6)
     echo "hostIP_v6: ${hostIP_v6}"
@@ -142,9 +131,20 @@ arDdnsCheck() {
     if [ "$lastIP_v6" != "$hostIP_v6" ]; then
         arDdnsUpdate_v6 ${hostIP_v6}
     fi
+	
+	if [ "$lastIP_v6" != "$hostIP_v6" ]; then
+        arDdnsUpdate
+        if [ $? -ne 0 ]; then
+            /sbin/ddns_custom_updated 1
+        else
+            /sbin/ddns_custom_updated 0
+        fi
+    else
+        /sbin/ddns_custom_updated 1
+    fi
 }
 
 ###################################################
 # 检查更新域名
 # 指定 domain subdomain
-arDdnsCheck "xxxxxxx.xxx" "xxx"
+arDdnsCheck "xxxxx.xxx" "xxxx"
